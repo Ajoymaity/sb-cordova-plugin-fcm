@@ -22,7 +22,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sunbird.app.R;
+import com.aastrika.sphere.R;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Created by Felipe Echanique on 08/06/2016.
@@ -53,7 +52,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     public SharedPreferences getSharedPreferences() {
         if (this.sharedPreferences == null) {
-            this.sharedPreferences = this.getContext().getSharedPreferences(MyFirebaseMessagingService.SHARED_PREFERENCES_NAME, Activity.MODE_PRIVATE);
+            this.sharedPreferences = this.getContext()
+                    .getSharedPreferences(MyFirebaseMessagingService.SHARED_PREFERENCES_NAME, Activity.MODE_PRIVATE);
         }
 
         return this.sharedPreferences;
@@ -61,8 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private String getStringResource(String name) {
         return this.getString(
-                this.getResources().getIdentifier(name, "string", this.getPackageName())
-        );
+                this.getResources().getIdentifier(name, "string", this.getPackageName()));
     }
 
     public class NotificationUtils extends ContextWrapper {
@@ -80,21 +79,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             // create android channel
             NotificationChannel androidChannel = new NotificationChannel(ANDROID_CHANNEL_ID,
                     ANDROID_CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
-            // Sets whether notifications posted to this channel should display notification lights
+            // Sets whether notifications posted to this channel should display notification
+            // lights
             androidChannel.enableLights(true);
             // Sets whether notification posted to this channel should vibrate.
             androidChannel.enableVibration(true);
             // Sets the notification light color for notifications posted to this channel
             androidChannel.setLightColor(Color.GREEN);
-            // Sets whether notifications posted to this channel appear on the lockscreen or not
+            // Sets whether notifications posted to this channel appear on the lockscreen or
+            // not
             androidChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
             getManager().createNotificationChannel(androidChannel);
         }
 
         private NotificationManager getManager() {
             if (mManager == null) {
-                mManager = (NotificationManager)
-                        getSystemService(Context.NOTIFICATION_SERVICE);
+                mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             }
             return mManager;
         }
@@ -109,15 +109,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     /**
      * Called when message is received.
      *
-     * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
+     * @param remoteMessage Object representing the message received from Firebase
+     *                      Cloud Messaging.
      */
     // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // TODO(developer): Handle FCM messages here.
-        // If the application is in the foreground handle both data and notification messages here.
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
+        // If the application is in the foreground handle both data and notification
+        // messages here.
+        // Also if you intend on generating your own notifications as a result of a
+        // received FCM
+        // message, here is where that should be initiated. See sendNotification method
+        // below.
         Log.d(TAG, "==> MyFirebaseMessagingService onMessageReceived");
         Log.d(TAG, "==>" + remoteMessage.toString());
         if (remoteMessage.getNotification() != null) {
@@ -135,7 +139,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Log.d(TAG, "\tNotification Data: " + data.toString());
         FCMPlugin.sendPushPayload(data);
-        //To get a Bitmap image from the URL received
+        // To get a Bitmap image from the URL received
 
         SharedPreferences.Editor edit = this.getSharedPreferences().edit();
         edit.putString(NotificationUtils.NOTIFICATION_RECEIVED_AT, String.valueOf(new Date().getTime()));
@@ -148,23 +152,30 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 Log.d("MyFirebaseMessaging", "Code Push");
             } else if (actionData.has("filter") && !actionData.isNull("filter")) {
                 JSONObject filter = new JSONObject(actionData.getString("filter"));
-                JSONObject subscribeProfileData = new JSONObject(this.getSharedPreferences().getString("current_user_profile", ""));
+                JSONObject subscribeProfileData = new JSONObject(
+                        this.getSharedPreferences().getString("current_user_profile", ""));
                 boolean isSendingNotification = false;
                 boolean failedNotification = true;
                 if (filter.has("profile") && !filter.isNull("profile") && failedNotification) {
                     JSONObject serverRequiredProfileData = filter.getJSONObject("profile");
                     for (int i = 0; i < serverRequiredProfileData.names().length(); i++) {
                         if (subscribeProfileData.has(serverRequiredProfileData.names().getString(i))) {
-                            if (serverRequiredProfileData.getString(serverRequiredProfileData.names().getString(i)).contains("[")) {
+                            if (serverRequiredProfileData.getString(serverRequiredProfileData.names().getString(i))
+                                    .contains("[")) {
                                 List<String> serverRequiredFilter = new ArrayList<String>();
                                 List<String> subscribeProfileFilter = new ArrayList<String>();
-                                for (int j = 0; j < serverRequiredProfileData.getJSONArray(serverRequiredProfileData.names().getString(i)).length(); j++) {
-                                    serverRequiredFilter.add(serverRequiredProfileData.getJSONArray(serverRequiredProfileData.names().getString(i)).getString(j));
+                                for (int j = 0; j < serverRequiredProfileData
+                                        .getJSONArray(serverRequiredProfileData.names().getString(i)).length(); j++) {
+                                    serverRequiredFilter.add(serverRequiredProfileData
+                                            .getJSONArray(serverRequiredProfileData.names().getString(i)).getString(j));
                                 }
-                                for (int j = 0; j < subscribeProfileData.getJSONArray(serverRequiredProfileData.names().getString(i)).length(); j++) {
-                                    subscribeProfileFilter.add(subscribeProfileData.getJSONArray(serverRequiredProfileData.names().getString(i)).getString(j));
+                                for (int j = 0; j < subscribeProfileData
+                                        .getJSONArray(serverRequiredProfileData.names().getString(i)).length(); j++) {
+                                    subscribeProfileFilter.add(subscribeProfileData
+                                            .getJSONArray(serverRequiredProfileData.names().getString(i)).getString(j));
                                 }
-                                if (serverRequiredFilter.stream().anyMatch(element -> subscribeProfileFilter.contains(element))) {
+                                if (serverRequiredFilter.stream()
+                                        .anyMatch(element -> subscribeProfileFilter.contains(element))) {
                                     isSendingNotification = true;
                                 } else {
                                     isSendingNotification = false;
@@ -173,7 +184,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 }
                             } else {
                                 if (serverRequiredProfileData.getString(serverRequiredProfileData.names().getString(i))
-                                        .equalsIgnoreCase(subscribeProfileData.getString(serverRequiredProfileData.names().getString(i)))) {
+                                        .equalsIgnoreCase(subscribeProfileData
+                                                .getString(serverRequiredProfileData.names().getString(i)))) {
                                     isSendingNotification = true;
                                 } else {
                                     isSendingNotification = false;
@@ -186,11 +198,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 }
                 if (filter.has("location") && filter.getJSONObject("location") != null && failedNotification) {
-                    JSONObject subscribeDeviceLocation = new JSONObject(this.getSharedPreferences().getString("device_location", ""));
+                    JSONObject subscribeDeviceLocation = new JSONObject(
+                            this.getSharedPreferences().getString("device_location", ""));
                     JSONObject serverRequiredDeviceLocation = filter.getJSONObject("location");
                     for (int i = 0; i < serverRequiredDeviceLocation.names().length(); i++) {
                         if (serverRequiredDeviceLocation.getString(serverRequiredDeviceLocation.names().getString(i))
-                                .equals(subscribeDeviceLocation.getString(serverRequiredDeviceLocation.names().getString(i)))) {
+                                .equals(subscribeDeviceLocation
+                                        .getString(serverRequiredDeviceLocation.names().getString(i)))) {
                             isSendingNotification = true;
                         } else {
                             isSendingNotification = false;
@@ -200,11 +214,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 }
                 if (isSendingNotification) {
-                    sendNotification(actionData.get("title").toString(), actionData.get("description").toString(), data, actionData);
+                    sendNotification(actionData.get("title").toString(), actionData.get("description").toString(), data,
+                            actionData);
                 }
 
             } else {
-                sendNotification(actionData.get("title").toString(), actionData.get("description").toString(), data, actionData);
+                sendNotification(actionData.get("title").toString(), actionData.get("description").toString(), data,
+                        actionData);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -229,12 +245,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "\tBitmap is running: ");
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("announcement", "Announcement", NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel = new NotificationChannel("announcement", "Announcement",
+                    NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("Announcement");
             channel.enableLights(true);
             // Sets whether notification posted to this channel should vibrate.
@@ -261,13 +276,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 if (actionData.get("banner") != null) {
                     Bitmap bitmap = getBitmapfromUrl(actionData.get("banner").toString());
                     // notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle()
-                            // .bigPicture(bitmap)
-                            // .bigLargeIcon(null));
+                    // .bigPicture(bitmap)
+                    // .bigLargeIcon(null));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
 
             notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
         } else {
@@ -290,24 +304,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 if (actionData.get("banner") != null) {
                     Bitmap bitmap = getBitmapfromUrl(actionData.get("banner").toString());
                     // notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle()
-                            // .bigPicture(bitmap)
-                            // .bigLargeIcon(null));
+                    // .bigPicture(bitmap)
+                    // .bigLargeIcon(null));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-
             notificationManager.notify(100 /* ID of notification */, notificationBuilder.build());
         }
-        //https://stackoverflow.com/questions/46990995/on-android-8-1-api-27-notification-does-not-display
+        // https://stackoverflow.com/questions/46990995/on-android-8-1-api-27-notification-does-not-display
 
     }
     // [END receive_message]
 
     /*
-     *To get a Bitmap image from the URL received
-     * */
+     * To get a Bitmap image from the URL received
+     */
     public Bitmap getBitmapfromUrl(String imageUrl) {
         try {
             URL url = new URL(imageUrl);
